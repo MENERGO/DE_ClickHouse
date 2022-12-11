@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  zookeeper_click:
+    image: zookeeper:latest
+    container_name: zookeeper_click
+    hostname: zookeeper_click
+
+  clickhouse-node1:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node1
+    hostname: clickhouse-node1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - "./clickhouse/node1:/etc/clickhouse-server"
+    depends_on:
+      - zookeeper_click
+
+  clickhouse-node2:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node2
+    hostname: clickhouse-node2
+    volumes:
+      - "./clickhouse/node2:/etc/clickhouse-server"
+    depends_on:
+      - zookeeper_click
+
+  clickhouse-node3:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node3
+    hostname: clickhouse-node3
+    volumes:
+      - "./clickhouse/node3:/etc/clickhouse-server"
+    depends_on:
+      - zookeeper_click
+
+  clickhouse-node4:
+    image: yandex/clickhouse-server:20.4
+    container_name: clickhouse-node4
+    hostname: clickhouse-node4
+    volumes:
+      - "./clickhouse/node2:/etc/clickhouse-server"
+    depends_on:
+      - zookeeper_click
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    env_file:
+      - ./.env
+    ports:
+      - 27017:27017
+    volumes:
+      - ./db/init_db.js:/docker-entrypoint-initdb.d/init_db.js
+
+  mongoexpress:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
+    env_file:
+      - ./.env
